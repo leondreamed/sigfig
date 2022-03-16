@@ -1,4 +1,10 @@
+/* eslint-disable complexity */
+
 import fromExponential from 'from-exponential';
+import {
+	convertNumberToString,
+	normalizeNumberString,
+} from '~/utils/number.js';
 
 function getFirstNonZeroDigitToRightIndex(num: string) {
 	for (let i = num.indexOf('.') + 1; i < num.length; i += 1) {
@@ -32,35 +38,8 @@ export function sigfig(
 		);
 	}
 
-	let numberString =
-		typeof numberOrString === 'number'
-			? numberOrString.toFixed(100)
-			: numberOrString;
-
-	if (Number.isNaN(Number(numberOrString))) {
-		throw new TypeError(`${numberOrString} is not a number.`);
-	}
-
-	// Convert exponential to decimal format
-	numberString = fromExponential(numberString);
-
-	// Remove the sign from the number
-	const isNegative = numberString.startsWith('-');
-
-	if (numberString.startsWith('+') || numberString.startsWith('-')) {
-		numberString = numberString.slice(1);
-	}
-
-	// Add a decimal to the end of the number if number doesn't have explicit decimal place (i.e. whole number)
-	if (!numberString.includes('.')) {
-		numberString += '.';
-	}
-
-	// Remove leading zeros (zeros at the beginning)
-	numberString = numberString.replace(/^0*(?!\.)/g, '');
-
-	// If the number is 0.abc, replace it with .abc
-	if (numberString.startsWith('0')) numberString = numberString.slice(1);
+	const { normalizedNumberString: numberString, isNegative } =
+		normalizeNumberString(convertNumberToString(numberOrString));
 
 	// By this point, a number will always be represented either .xyz or xyz.
 
@@ -117,22 +96,37 @@ export function sigfig(
 function roundDecimal(numberString: string, numSigfigs: number) {
 	const digits = [];
 	let roundingDigit: string | undefined;
-	let nonZeroEncountered = false;
+	let firstNonZeroDigitIndex: number | undefined;
 	let numSigfigsEncountered = 0;
+
+	if (numberString.startsWith('.')) numberString = '0' + numberString;
 
 	for (let i = 0; i < numberString.length; i += 1) {
 		const digit = numberString[i]!;
 		digits.push(digit);
 
-		if (digit !== '0' && digit !== '.') nonZeroEncountered = true;
+		if (
+			firstNonZeroDigitIndex === undefined &&
+			digit !== '0' &&
+			digit !== '.'
+		) {
+			firstNonZeroDigitIndex = i;
+		}
 
-		if (nonZeroEncountered && digit >= '0' && digit <= '9') {
+		if (firstNonZeroDigitIndex !== undefined && digit >= '0' && digit <= '9') {
 			numSigfigsEncountered += 1;
 			if (numSigfigsEncountered === numSigfigs) {
-				roundingDigit = numberString[i + 1]!;
+				roundingDigit =
+					(numberString[i + 1] === '.'
+						? numberString[i + 2]
+						: numberString[i + 1]) ?? '0';
 				break;
 			}
 		}
+	}
+
+	if (firstNonZeroDigitIndex === undefined) {
+		throw new Error('firstNonZeroDigitIndex should not be undefined');
 	}
 
 	for (let i = numSigfigsEncountered; i < numSigfigs; i += 1) {
@@ -144,14 +138,17 @@ function roundDecimal(numberString: string, numSigfigs: number) {
 	}
 
 	let carry = false;
-	for (let i = digits.length - 1; i > 0; i -= 1) {
+	for (let i = digits.length - 1; i >= 0; i -= 1) {
 		const digit = digits[i];
+		if (digit === '.') {
+			continue;
+		}
+
 		if (digit === '9') {
 			digits[i] = 0;
 			carry = true;
 		} else {
-			// If digits[i] was a 0, now it becomes significant so we need to pop a number off the digits array
-			if (digits[i] === '0') {
+			if (i < firstNonZeroDigitIndex) {
 				digits.pop();
 			}
 
@@ -161,10 +158,12 @@ function roundDecimal(numberString: string, numSigfigs: number) {
 		}
 	}
 
+	// The first digit is now a "0"
 	if (carry) {
-		digits.pop();
 		digits.unshift('1');
 	}
+
+	if (digits.at(-1) === '.') digits.pop();
 
 	return digits.join('');
 }

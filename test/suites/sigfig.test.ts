@@ -59,6 +59,15 @@ test('rounds correctly', () => {
 
 	expect(sigfig('0.09500000000000008', 1)).toEqual('0.1');
 
+	expect(sigfig('0.000109', 2)).toEqual('0.00011');
+	expect(sigfig('1.0430812624750985e-7', 15)).toEqual(
+		'0.000000104308126247510'
+	);
+	expect(sigfig('0.04760919500000005', 7)).toEqual('0.04760920');
+	expect(sigfig('0.9500000029802322', 1)).toEqual('1');
+
+	expect(sigfig('9.9', 1)).toEqual('10');
+
 	expect(() => sigfig('not a number', 1)).toThrow();
 	expect(() => sigfig('42', 0)).toThrow();
 	expect(() => sigfig('not a number', 0)).toThrow();
