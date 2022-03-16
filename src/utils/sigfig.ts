@@ -1,3 +1,5 @@
+import fromExponential from 'from-exponential';
+
 /**
 Returns number of significant figures
 */
@@ -24,6 +26,8 @@ export function sigfig(
 	if (Number.isNaN(Number(numberOrString))) {
 		throw new TypeError(`${numberOrString} is not a number.`);
 	}
+
+	numberString = fromExponential(numberString);
 
 	const isNegative = numberString.startsWith('-');
 
