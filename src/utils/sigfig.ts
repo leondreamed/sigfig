@@ -25,11 +25,14 @@ export function sigfig(
 		throw new TypeError(`${numberOrString} is not a number.`);
 	}
 
-	if (numberString.startsWith('.')) {
-		numberString = '0' + numberString;
+	const isNegative = numberString.startsWith('-');
+
+	// Remove the sign from the number
+	if (numberString.startsWith('+') || numberString.startsWith('-')) {
+		numberString = numberString.slice(1);
 	}
 
-	// Add a decimal to the end of the number if number doesn't have explicit decimal place
+	// Add a decimal to the end of the number if number doesn't have explicit decimal place (i.e. whole number)
 	if (!numberString.includes('.')) {
 		numberString += '.';
 	}
@@ -37,19 +40,15 @@ export function sigfig(
 	const decimalIndex = numberString.indexOf('.');
 	const wholeNumberLength = decimalIndex;
 
-	// Handle the case where numbers to the right of the decimal place are all 0
-	const firstNonZeroDigitToRightIndex = (() => {
-		for (let i = decimalIndex + 1; i < numberString.length; i += 1) {
-			if (numberString[i] !== '0') {
-				return i;
-			}
+	// Handle the case where the number contains all zeros
+	if (/^[0.]+$/.test(numberString)) {
+		if (numSigfigs === undefined) {
+			if (numberString === '0.') return 1;
+			return numberString.length - decimalIndex;
+		} else {
+			if (numSigfigs === 1) return '0';
+			else return '0.' + '0'.repeat(numSigfigs - 1);
 		}
-
-		return undefined;
-	})();
-
-	if (firstNonZeroDigitToRightIndex === undefined) {
-		numberString = numberString.slice(0, decimalIndex + 1);
 	}
 
 	const firstNonZeroDigitToLeftIndex = (() => {
@@ -62,22 +61,35 @@ export function sigfig(
 		return undefined;
 	})();
 
-	if (numSigfigs) {
-		if (
-			firstNonZeroDigitToLeftIndex === undefined &&
-			firstNonZeroDigitToRightIndex !== undefined
-		) {
-			numSigfigs += 1;
-		}
+	if (firstNonZeroDigitToLeftIndex === undefined) {
+		numberString = numberString.slice(decimalIndex);
+	}
 
+	// By this point, a number will always be represented either .xyz or xyz.
+
+	if (numSigfigs === undefined) {
+		return numberString.length - 1;
+	} else {
 		const roundedDecimal = roundDecimal(numberString, numSigfigs);
-		return roundedDecimal.padEnd(
+
+		let answer = roundedDecimal.padEnd(
 			Math.max(
 				wholeNumberLength,
 				roundedDecimal.includes('.') ? numSigfigs + 1 : numSigfigs
 			),
 			'0'
 		);
+
+		// Normalizing the answer
+		if (answer.startsWith('.')) {
+			answer = '0' + answer;
+		}
+
+		if (answer.endsWith('.')) {
+			answer = answer.slice(0, -1);
+		}
+
+		return isNegative ? `-${answer}` : answer;
 	}
 }
 
