@@ -64,7 +64,7 @@ test('fast check', () => {
 	fc.assert(
 		fc.property(
 			fc.double(),
-			fc.integer().filter((n) => n > 0 && n < 100),
+			fc.integer().filter((n) => n > 0 && n < 100_000),
 			(number, numSigfigs) => {
 				expect(sigfig(sigfig(number, numSigfigs))).toEqual(numSigfigs);
 			}
