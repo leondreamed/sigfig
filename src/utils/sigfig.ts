@@ -26,6 +26,12 @@ export function sigfig(
 	numberOrString: string | number,
 	numSigfigs?: number
 ): number | string {
+	if (numSigfigs !== undefined && numSigfigs <= 0) {
+		throw new TypeError(
+			'The number of significant figures to round to must be greater than 0.'
+		);
+	}
+
 	let numberString =
 		typeof numberOrString === 'number'
 			? numberOrString.toFixed(100)
