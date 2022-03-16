@@ -1,5 +1,13 @@
 import fromExponential from 'from-exponential';
 
+function getFirstNonZeroDigitToRightIndex(num: string) {
+	for (let i = num.indexOf('.') + 1; i < num.length; i += 1) {
+		if (num[i] !== '0') return i;
+	}
+
+	return undefined;
+}
+
 /**
 Returns number of significant figures
 */
@@ -27,11 +35,12 @@ export function sigfig(
 		throw new TypeError(`${numberOrString} is not a number.`);
 	}
 
+	// Convert exponential to decimal format
 	numberString = fromExponential(numberString);
 
+	// Remove the sign from the number
 	const isNegative = numberString.startsWith('-');
 
-	// Remove the sign from the number
 	if (numberString.startsWith('+') || numberString.startsWith('-')) {
 		numberString = numberString.slice(1);
 	}
@@ -41,40 +50,42 @@ export function sigfig(
 		numberString += '.';
 	}
 
-	const decimalIndex = numberString.indexOf('.');
-	const wholeNumberLength = decimalIndex;
+	// Remove leading zeros (zeros at the beginning)
+	numberString = numberString.replace(/^0*(?!\.)/g, '');
 
-	// Handle the case where the number contains all zeros
-	if (/^[0.]+$/.test(numberString)) {
-		if (numSigfigs === undefined) {
-			if (numberString === '0.') return 1;
-			return numberString.length - decimalIndex;
-		} else {
-			if (numSigfigs === 1) return '0';
-			else return '0.' + '0'.repeat(numSigfigs - 1);
-		}
-	}
-
-	const firstNonZeroDigitToLeftIndex = (() => {
-		for (let i = decimalIndex - 1; i >= 0; i -= 1) {
-			if (numberString[i] !== '0') {
-				return i;
-			}
-		}
-
-		return undefined;
-	})();
-
-	if (firstNonZeroDigitToLeftIndex === undefined) {
-		numberString = numberString.slice(decimalIndex);
-	}
+	// If the number is 0.abc, replace it with .abc
+	if (numberString.startsWith('0')) numberString = numberString.slice(1);
 
 	// By this point, a number will always be represented either .xyz or xyz.
 
+	const decimalIndex = numberString.indexOf('.');
+
+	// Handle the case when there are only zeros in the number
+	if (/^[0.]+$/.test(numberString)) {
+		if (numSigfigs === undefined) {
+			if (numberString === '.') return 1;
+			else return numberString.length - 1;
+		} else {
+			if (numSigfigs === 1) {
+				return '0';
+			} else {
+				return `0.${'0'.repeat(numSigfigs - 1)}`;
+			}
+		}
+	}
+
+	const firstNonZeroDigitToRightIndex =
+		getFirstNonZeroDigitToRightIndex(numberString);
+
 	if (numSigfigs === undefined) {
-		return numberString.length - 1;
+		if (numberString.startsWith('.')) {
+			return numberString.length - firstNonZeroDigitToRightIndex!;
+		} else {
+			return numberString.length - 1;
+		}
 	} else {
 		const roundedDecimal = roundDecimal(numberString, numSigfigs);
+		const wholeNumberLength = decimalIndex;
 
 		let answer = roundedDecimal.padEnd(
 			Math.max(

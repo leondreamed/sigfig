@@ -35,7 +35,6 @@ test('rounds correctly', () => {
 
 	for (const [numSigfigs, result] of num2Expected) {
 		expect(sigfig(num2, numSigfigs)).toEqual(result);
-		console.log(result, numSigfigs);
 		expect(sigfig(result)).toEqual(numSigfigs);
 	}
 
@@ -52,8 +51,17 @@ test('rounds correctly', () => {
 	expect(sigfig('0', 2)).toEqual('0.0');
 
 	expect(sigfig('0')).toEqual(1);
-	expect(sigfig('0.0')).toEqual(2);
+	expect(sigfig('0.')).toEqual(1);
+	expect(sigfig('.0')).toEqual(1);
+	expect(sigfig('0.0')).toEqual(1);
+	expect(sigfig('0.00')).toEqual(2);
+	expect(sigfig('0', 1)).toEqual('0');
+	expect(sigfig('0', 2)).toEqual('0.00');
 
+	expect(sigfig('0.00000000001')).toEqual(1);
+});
+
+test('fast check', () => {
 	fc.assert(
 		fc.property(
 			fc.double(),
@@ -63,11 +71,13 @@ test('rounds correctly', () => {
 			}
 		)
 	);
+});
 
+test('fast check 2', () => {
 	// Correctly rounds positive integers
 	fc.assert(
 		fc.property(
-			fc.integer().filter((n) => n >= 0),
+			fc.integer().filter((n) => n >= 1),
 			fc.integer().filter((n) => n > 0 && n < 100),
 			(integer, numSigfigs) => {
 				if (numSigfigs > String(integer).length) {
