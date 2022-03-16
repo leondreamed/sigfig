@@ -144,7 +144,13 @@ function roundDecimal(numberString: string, numSigfigs: number) {
 			digits[i] = 0;
 			carry = true;
 		} else {
+			// If digits[i] was a 0, now it becomes significant so we need to pop a number off the digits array
+			if (digits[i] === '0') {
+				digits.pop();
+			}
+
 			digits[i] = String(Number(digit) + 1);
+			carry = false;
 			break;
 		}
 	}

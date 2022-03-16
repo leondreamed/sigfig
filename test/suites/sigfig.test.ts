@@ -56,6 +56,8 @@ test('rounds correctly', () => {
 	expect(sigfig('0', 2)).toEqual('0.00');
 
 	expect(sigfig('0.00000000001')).toEqual(1);
+
+	expect(sigfig('0.09500000000000008', 1)).toEqual('0.1');
 });
 
 test('fast check', () => {
@@ -64,10 +66,6 @@ test('fast check', () => {
 			fc.double(),
 			fc.integer().filter((n) => n > 0 && n < 100),
 			(number, numSigfigs) => {
-				console.log(
-					sigfig(number, numSigfigs),
-					sigfig(sigfig(number, numSigfigs))
-				);
 				expect(sigfig(sigfig(number, numSigfigs))).toEqual(numSigfigs);
 			}
 		)
