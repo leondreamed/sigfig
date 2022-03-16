@@ -69,7 +69,7 @@ export function sigfig(
 			if (numSigfigs === 1) {
 				return '0';
 			} else {
-				return `0.${'0'.repeat(numSigfigs - 1)}`;
+				return `0.${'0'.repeat(numSigfigs)}`;
 			}
 		}
 	}
@@ -108,23 +108,29 @@ export function sigfig(
 	}
 }
 
-/**
-Rounds a decimal number so that it has exactly `numDigits` digits
-*/
-function roundDecimal(numberString: string, numDigits: number) {
+function roundDecimal(numberString: string, numSigfigs: number) {
 	const digits = [];
 	let roundingDigit: string | undefined;
+	let nonZeroEncountered = false;
+	let numSigfigsEncountered = 0;
 
-	for (let i = 0, numDigitsEncountered = 0; i < numberString.length; i += 1) {
+	for (let i = 0; i < numberString.length; i += 1) {
 		const digit = numberString[i]!;
 		digits.push(digit);
-		if (digit >= '0' && digit <= '9') {
-			numDigitsEncountered += 1;
-			if (numDigitsEncountered === numDigits) {
+
+		if (digit !== '0' && digit !== '.') nonZeroEncountered = true;
+
+		if (nonZeroEncountered && digit >= '0' && digit <= '9') {
+			numSigfigsEncountered += 1;
+			if (numSigfigsEncountered === numSigfigs) {
 				roundingDigit = numberString[i + 1]!;
 				break;
 			}
 		}
+	}
+
+	for (let i = numSigfigsEncountered; i < numSigfigs; i += 1) {
+		digits.push('0');
 	}
 
 	if (roundingDigit === undefined || roundingDigit < '5') {
