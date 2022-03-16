@@ -58,6 +58,10 @@ test('rounds correctly', () => {
 	expect(sigfig('0.00000000001')).toEqual(1);
 
 	expect(sigfig('0.09500000000000008', 1)).toEqual('0.1');
+
+	expect(() => sigfig('not a number', 1)).toThrow();
+	expect(() => sigfig('42', 0)).toThrow();
+	expect(() => sigfig('not a number', 0)).toThrow();
 });
 
 test('fast check', () => {
