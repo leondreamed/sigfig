@@ -1,12 +1,11 @@
 import { test, expect } from 'vitest';
 import * as fc from 'fast-check';
-import { sigfig } from '~/index.js';
+import sigfig from '~/index.js';
 
 test('rounds correctly', () => {
 	const num1 = '3.10194';
 
 	const num1Expected = [
-		[1, '3'],
 		[1, '3'],
 		[2, '3.1'],
 		[3, '3.10'],

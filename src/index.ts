@@ -1,1 +1,1 @@
-export { sigfig } from './utils/sigfig.js'
+export { sigfig as default } from './utils/sigfig.js';
