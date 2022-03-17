@@ -67,10 +67,13 @@ test('rounds correctly', () => {
 	expect(sigfig('0.9500000029802322', 1)).toEqual('1');
 
 	expect(sigfig('9.9', 1)).toEqual('10');
-
+	expect(() => sigfig(Number.NaN, 1)).toThrow();
+	expect(() => sigfig(1, Number.NaN)).toThrow();
+	expect(() => sigfig(Number.NaN, Number.NaN)).toThrow();
 	expect(() => sigfig('not a number', 1)).toThrow();
 	expect(() => sigfig('42', 0)).toThrow();
 	expect(() => sigfig('not a number', 0)).toThrow();
+	expect(() => sigfig('42', 1.3)).toThrow();
 });
 
 test('fast check', () => {

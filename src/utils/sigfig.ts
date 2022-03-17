@@ -1,6 +1,5 @@
 /* eslint-disable complexity */
 
-import fromExponential from 'from-exponential';
 import {
 	convertNumberToString,
 	normalizeNumberString,
@@ -32,9 +31,12 @@ export function sigfig(
 	numberOrString: string | number,
 	numSigfigs?: number
 ): number | string {
-	if (numSigfigs !== undefined && numSigfigs <= 0) {
+	if (
+		numSigfigs !== undefined &&
+		(numSigfigs <= 0 || !Number.isInteger(numSigfigs))
+	) {
 		throw new TypeError(
-			'The number of significant figures to round to must be greater than 0.'
+			'The number of significant figures to round to must be an integer greater than 0.'
 		);
 	}
 
