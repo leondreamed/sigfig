@@ -95,7 +95,9 @@ test('fast check 2', () => {
 			fc.integer().filter((n) => n > 0 && n < 100),
 			(integer, numSigfigs) => {
 				if (numSigfigs > String(integer).length) {
-					expect(sigfig(integer, numSigfigs).length).toEqual(numSigfigs + 1);
+					expect(sigfig(integer, numSigfigs).length).toEqual(
+						numSigfigs + 1 // +1 accounts for decimal place
+					);
 				} else {
 					expect(sigfig(integer, numSigfigs).length).toEqual(
 						String(integer).length
