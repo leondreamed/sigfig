@@ -1,5 +1,6 @@
-import { test, expect } from 'vitest';
 import * as fc from 'fast-check';
+import { expect, test } from 'vitest';
+
 import sigfig from '~/index.js';
 
 test('rounds correctly', () => {
