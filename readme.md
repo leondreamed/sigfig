@@ -1,6 +1,6 @@
 # sigfig
 
-[![npm version](https://badge.fury.io/js/sigfig.svg)](https://badge.fury.io/js/sigfig)
+[![npm version](https://img.shields.io/npm/v/sigfig)](https://npmjs.com/package/sigfig)
 
 Retrieve the amount of significant figures in a number or round a number to a certain amount of significant figures.
 
