@@ -16,7 +16,6 @@ sigfig('0.00023224', 4); // "0.0002322"
 
 // When called without a second argument, it returns the number of
 // significant figures provided in the number passed as the first argument:
-
 sigfig('9.9'); // 2
 sigfig('3.10194'); // 6
 sigfig('0.00023224'); // 5
