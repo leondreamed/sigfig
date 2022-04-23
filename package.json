@@ -1,6 +1,6 @@
 {
 	"name": "sigfig",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "Round a number to n significant figures.",
 	"license": "MIT",
 	"repository": {
